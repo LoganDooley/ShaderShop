@@ -46,6 +46,8 @@ add_executable(${PROJECT_NAME}
     external/imgui/backends/imgui_impl_opengl3_loader.h
     external/imgui/backends/imgui_impl_glfw.cpp
     external/imgui/backends/imgui_impl_glfw.h
+    external/imgui/misc/cpp/imgui_stdlib.cpp
+    external/imgui/misc/cpp/imgui_stdlib.h
 )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/external/glfw)
@@ -58,6 +60,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/external/tol)
 target_include_directories(ShaderShop 
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/misc/cpp
     )
 
 # Specifies libraries to be linked (Qt components, glew, etc)

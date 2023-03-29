@@ -22,6 +22,10 @@ public:
     void windowResizeEvent(int width, int height);
     void framebufferResizeEvent(int width, int height);
 
-private:
+    void compileShader(std::vector<std::string> shaderSources, std::vector<GLenum> shaderTypes, std::string& infoLog);
 
+private:
+    GLuint m_vbo = 0;
+    GLuint m_vao = 0;
+    GLuint m_shader = 0;
 };

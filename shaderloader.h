@@ -8,48 +8,20 @@
 
 class ShaderLoader{
 public:
-    static GLuint createShaderProgram(const char * vertex_file_path, const char * fragment_file_path){
+    static GLuint createShaderProgram(std::vector<std::string> shaderSources, std::vector<GLenum> shaderTypes, std::string& infoLog){
         // Create and compile the shaders.
-        GLuint vertexShaderID = createShader(GL_VERTEX_SHADER, vertex_file_path);
-        GLuint fragmentShaderID = createShader(GL_FRAGMENT_SHADER, fragment_file_path);
-
-        // Link the shader program.
-        GLuint programID = glCreateProgram();
-        glAttachShader(programID, vertexShaderID);
-        glAttachShader(programID, fragmentShaderID);
-        glLinkProgram(programID);
-
-        // Print the info log if error
-        GLint status;
-        glGetProgramiv(programID, GL_LINK_STATUS, &status);
-
-        if (status == GL_FALSE) {
-            GLint length;
-            glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &length);
-
-            std::string log(length, '\0');
-            glGetProgramInfoLog(programID, length, nullptr, &log[0]);
-
-            glDeleteProgram(programID);
-            throw std::runtime_error(log);
+        if(shaderSources.size() != shaderTypes.size()){
+            infoLog = "Must be the same number of shader files as shader types!";
+            return -1;
         }
 
-        // Shaders no longer necessary, stored in program
-        glDeleteShader(vertexShaderID);
-        glDeleteShader(fragmentShaderID);
-
-        return programID;
-    }
-
-    static GLuint createShaderProgram(std::vector<const char *> shaderFilepaths, std::vector<GLenum> shaderTypes){
-        // Create and compile the shaders.
-        if(shaderFilepaths.size() != shaderTypes.size()){
-            throw std::runtime_error("Must be the same number of shader files as shader types!");
-        }
-
-        std::vector<GLuint> shaderIDs = std::vector<GLuint>(shaderFilepaths.size());
+        std::vector<GLuint> shaderIDs = std::vector<GLuint>(shaderSources.size());
         for(int i = 0; i<shaderIDs.size(); i++){
-            shaderIDs[i] = createShader(shaderTypes[i], shaderFilepaths[i]);
+            shaderIDs[i] = createShader(shaderTypes[i], shaderSources[i].c_str(), infoLog);
+            // If failed to compile shader, fail to compile program
+            if(shaderIDs[i] == -1){
+                return -1;
+            }
         }
 
         // Link the shader program.
@@ -71,7 +43,10 @@ public:
             glGetProgramInfoLog(programID, length, nullptr, &log[0]);
 
             glDeleteProgram(programID);
-            throw std::runtime_error(log);
+            //std::cout<<log<<std::endl;
+            std::string programLog = "Error Linking Program!\n";
+            infoLog = programLog + log;
+            return -1;
         }
 
         // Shaders no longer necessary, stored in program
@@ -79,29 +54,16 @@ public:
             glDeleteShader(shaderID);
         }
 
+        infoLog = "Success!";
+
         return programID;
     }
 
 private:
-    static GLuint createShader(GLenum shaderType, const char *filepath){
+    static GLuint createShader(GLenum shaderType, const char *shaderSource, std::string& infoLog){
         GLuint shaderID = glCreateShader(shaderType);
 
-        // Read shader file.
-        std::string code;
-        std::ifstream file(filepath);
-        if (file.is_open()) {
-            std::string line;
-            while(std::getline(file, line)){
-                code += line + std::string("\n");
-            }
-            file.close();
-        }else{
-            throw std::runtime_error(std::string("Failed to open shader: ")+filepath);
-        }
-
-        // Compile shader code.
-        const char *codePtr = code.c_str();
-        glShaderSource(shaderID, 1, &codePtr, nullptr); // Assumes code is null terminated
+        glShaderSource(shaderID, 1, &shaderSource, nullptr); // Assumes code is null terminated
         glCompileShader(shaderID);
 
         // Print info log if shader fails to compile.
@@ -116,7 +78,17 @@ private:
             glGetShaderInfoLog(shaderID, length, nullptr, &log[0]);
 
             glDeleteShader(shaderID);
-            throw std::runtime_error(log);
+            //std::cout<<log<<std::endl;
+            std::string shaderTypeStr;
+            if(shaderType == GL_VERTEX_SHADER){
+                shaderTypeStr = "Vertex Shader Errors!\n";
+            }
+            else{
+                shaderTypeStr = "Fragment Shader Errors!\n";
+            }
+
+            infoLog = shaderTypeStr + log;
+            return -1;
         }
 
         return shaderID;

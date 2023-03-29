@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
+#include "imgui_stdlib.h"
 
 #ifndef IMGUI_DISABLE
 
@@ -97,6 +98,23 @@ int Window::start(){
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
+    // Initialize Shader Defaults
+    m_vertexSource = "#version 330 core\n"
+        "layout(location = 0) in vec2 vert;\n"
+        "\n"
+        "void main()\n"
+        "{\n"
+        "    gl_Position = vec4(vert, 0, 1);\n"
+        "}";
+
+    m_fragmentSource = "#version 330 core\n"
+        "\n"
+        "out vec4 fragColor;\n"
+        "void main()\n"
+        "{\n"
+        "    fragColor = vec4(1);\n"
+        "}";
+
     return 0;
 }
 
@@ -121,8 +139,12 @@ int Window::loop(){
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::Begin("Inspector Window");
-        char buf[255]{};
-        ImGui::InputTextMultiline("FragmentShader", buf, sizeof(buf));
+        ImGui::InputTextMultiline("Vertex Shader", &m_vertexSource);
+        ImGui::InputTextMultiline("Fragment Shader", &m_fragmentSource);
+        if(ImGui::Button("Compile Shader")){
+            m_core->compileShader({m_vertexSource, m_fragmentSource}, {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER}, m_infoLog);
+        }
+        ImGui::Text((std::string("Info Log: ")+m_infoLog).c_str());
         ImGui::End();
         // Render dear imgui into screen
         ImGui::Render();

@@ -27,4 +27,8 @@ private:
     Core* m_core;
     bool m_coreAllocated = false;
     const double m_secPerUpdate = 1.0/60;
+
+    std::string m_vertexSource;
+    std::string m_fragmentSource;
+    std::string m_infoLog;
 };

@@ -32,9 +32,12 @@ int Core::update(float seconds){
     return 0;
 }
 
-int Core::draw(){
+int Core::draw(double time){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(m_shader);
+    if(m_timeUniformLoc != -1){
+        glUniform1f(m_timeUniformLoc, static_cast<GLfloat>(time - m_startTime));
+    }
     glBindVertexArray(m_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
@@ -74,5 +77,10 @@ void Core::compileShader(std::vector<std::string> shaderSources, std::vector<GLe
     }
     else{
         glDeleteProgram(prev);
+        m_timeUniformLoc = glGetUniformLocation(m_shader, "ss_time");
     }
+}
+
+void Core::setStartTime(double time){
+    m_startTime = time;
 }

@@ -129,7 +129,7 @@ int Window::loop(){
         if(updateResult != 0){
             return updateResult;
         }
-        int drawResult = m_core->draw();
+        int drawResult = m_core->draw(glfwGetTime());
         if(drawResult != 0){
             return drawResult;
         }
@@ -143,6 +143,9 @@ int Window::loop(){
         ImGui::InputTextMultiline("Fragment Shader", &m_fragmentSource);
         if(ImGui::Button("Compile Shader")){
             m_core->compileShader({m_vertexSource, m_fragmentSource}, {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER}, m_infoLog);
+            if(m_infoLog.compare("Success!") == 0){
+                m_core->setStartTime(glfwGetTime());
+            }
         }
         ImGui::Text((std::string("Info Log: ")+m_infoLog).c_str());
         ImGui::End();

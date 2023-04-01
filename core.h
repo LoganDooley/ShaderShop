@@ -14,7 +14,7 @@ public:
     Core(int width, int height);
     ~Core();
     int update(float seconds);
-    int draw();
+    int draw(double time);
     void keyEvent(int key, int action);
     void mousePosEvent(double xpos, double ypos);
     void mouseButtonEvent(int button, int action);
@@ -23,9 +23,13 @@ public:
     void framebufferResizeEvent(int width, int height);
 
     void compileShader(std::vector<std::string> shaderSources, std::vector<GLenum> shaderTypes, std::string& infoLog);
+    void setStartTime(double time);
 
 private:
     GLuint m_vbo = 0;
     GLuint m_vao = 0;
     GLuint m_shader = 0;
+
+    double m_startTime = 0;
+    GLint m_timeUniformLoc = -1;
 };
